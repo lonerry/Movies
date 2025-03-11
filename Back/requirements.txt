@@ -6,7 +6,7 @@ click==8.1.7
 colorama==0.4.6
 cryptography==41.0.3
 ecdsa==0.18.0
-fastapi==0.101.1
+fastapi[standard]==0.101.1
 greenlet==2.0.2
 h11==0.14.0
 idna==3.4
@@ -26,3 +26,5 @@ SQLAlchemy==2.0.20
 starlette==0.27.0
 typing_extensions==4.7.1
 uvicorn==0.23.2
+
+
