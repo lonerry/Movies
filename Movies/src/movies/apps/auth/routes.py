@@ -2,68 +2,59 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
 from src.movies.apps.auth.oauth2 import create_access_token, get_current_user, oauth2_schema, revoke_token
-from src.movies.apps.auth.schemas import RegisterResponse
-from src.movies.apps.user import schemas as user_schemas
+from src.movies.apps.user.schemas import UserCreate
 from src.movies.apps.user import schemas, db_queries
-from fastapi.security import OAuth2PasswordRequestForm
-
+from .hash_password import HashPassword
+from fastapi import status
+from .schemas import LoginSchema
 router = APIRouter(
     prefix="/auth",
     tags=["authentication"],
 )
 
-@router.post("/register", response_model=RegisterResponse)
-async def register_user(request: user_schemas.UserCreate, db: Session = Depends(get_db)):
+@router.post("/register", status_code=201)
+async def register_user(request: UserCreate, db: Session = Depends(get_db)):
     """
     Зарегистрировать нового пользователя.
-
-    При успешной регистрации генерирует токен и возвращает его.
-
-    **Raises**:
-        `HTTPException(422)`: если пользователь с таким email уже существует.
+    Ничего не возвращает (при успехе 201 Created).
     """
     existing_user = db_queries.get_user(db, email=request.email)
     if existing_user:
-        raise HTTPException(status_code=400, detail="User already exists")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User already exists"
+        )
+    # Создаём нового пользователя
+    db_queries.create_user(db, request)
+    # Просто завершаем без возвращаемых данных
+    return
 
-    new_user = db_queries.create_user(db, request)
-    access_token = create_access_token(data={"username": new_user.username})
-
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
+@router.post("/login")
+def login(request: LoginSchema, db: Session = Depends(get_db)):
+    """
+    Логин по JSON:
+    {
+      "username": "...",
+      "password": "..."
     }
 
-@router.post("/token")
-def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    """
-    Получить токен доступа.
-
-    Проверяет логин/пароль. Если пользователь найден и пароль верный —
-    выдаёт токен.
-
-    **Raises**:
-        `HTTPException(422)`: если пользователь не найден или неверный пароль.
+    Возвращает JSON с ключом "token".
     """
     user = db_queries.get_user(db, username=request.username)
-    if not user:
-        raise HTTPException(status_code=400, detail="Invalid username or password")
-    # Проверка пароля, если есть...
+    # Проверяем, что пользователь существует и пароль совпадает
+    if not user or not HashPassword.verify(user.password, request.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password"
+        )
+
     access_token = create_access_token(data={"username": user.username})
-    return {
-        "access_token": access_token,
-        "token_type": "bearer"
-    }
+    return {"token": access_token}
 
 @router.post("/logout")
 def logout(db: Session = Depends(get_db), token: str = Depends(oauth2_schema)):
     """
     Выйти из системы (отозвать токен).
-
-    Добавляет токен в таблицу отозванных (revoked_token).
-
-    **Raises**:
-        `HTTPException(401)`: если токен недействителен или не передан.
     """
     revoke_token(db, token)
     return {"message": "Successfully logged out"}
