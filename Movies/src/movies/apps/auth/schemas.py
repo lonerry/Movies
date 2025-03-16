@@ -7,3 +7,7 @@ class RegisterResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class LoginSchema(BaseModel):
+    username: str
+    password: str
