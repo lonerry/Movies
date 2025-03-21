@@ -1,37 +1,36 @@
 version: "3.9"
+
 services:
   db:
     image: mysql:8.0
     container_name: mysql_db
     environment:
-      MYSQL_ROOT_PASSWORD: "Solntseva200!"
-      MYSQL_DATABASE: "my_database"
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: my_database
     ports:
       - "3306:3306"
     networks:
       - movies_net
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "db", "-u", "root", "--password=Solntseva200!"]
-      interval: 5s
-      timeout: 5s
+      test: ["CMD-SHELL", "mysql -uroot -p$${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"]
+      interval: 10s
+      timeout: 10s
       retries: 5
-      start_period: 5s
+      start_period: 30s
 
   app:
-    build: Movies
+    build: .
     container_name: movies_app
     ports:
       - "8000:8000"
     environment:
-      # Внутри сети Docker - хост называется "db"
-      DATABASE_URL: "mysql+pymysql://root:Solntseva200!@db:3306/my_database"
+      DATABASE_URL: "mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@db:3306/my_database"
     depends_on:
-      db:
-        # ждем, пока db будет health: healthy
-        condition: service_healthy
+      - db
     networks:
       - movies_net
-
+    command: >
+      sh -c "/wait-for-it.sh db:3306 -t 60 -- poetry run uvicorn main:app --host 0.0.0.0 --port 8000"
 networks:
   movies_net:
     driver: bridge
