@@ -37,7 +37,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            docker pull yourusername/yourapp:latest
-            docker stop yourapp || true
-            docker rm yourapp || true
-            docker run -d -p 8000:8000 --name yourapp yourusername/yourapp:latest
+            docker pull lonerry/movies-app:latest
+            docker stop movies-app || true
+            docker rm movies-app || true
+            docker run -d -p 8000:8000 --name movies-app lonerry/movies-app:latest
