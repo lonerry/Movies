@@ -1,0 +1,37 @@
+version: "3.9"
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: "Solntseva200!"
+      MYSQL_DATABASE: "my_database"
+    ports:
+      - "3306:3306"
+    networks:
+      - movies_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "db", "-u", "root", "--password=Solntseva200!"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  app:
+    build: .
+    container_name: movies_app
+    ports:
+      - "8000:8000"
+    environment:
+      # Внутри сети Docker - хост называется "db"
+      DATABASE_URL: "mysql+pymysql://root:Solntseva200!@db:3306/my_database"
+    depends_on:
+      db:
+        # ждем, пока db будет health: healthy
+        condition: service_healthy
+    networks:
+      - movies_net
+
+networks:
+  movies_net:
+    driver: bridge
