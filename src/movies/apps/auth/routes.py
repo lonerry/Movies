@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
+from fastapi.security import OAuth2PasswordRequestForm
 from src.movies.apps.auth.oauth2 import create_access_token, get_current_user, oauth2_schema, revoke_token
 from src.movies.apps.user.schemas import UserCreate
 from src.movies.apps.user import schemas, db_queries
@@ -29,27 +30,22 @@ async def register_user(request: UserCreate, db: Session = Depends(get_db)):
     # Просто завершаем без возвращаемых данных
     return
 
-@router.post("/login")
-def login(request: LoginSchema, db: Session = Depends(get_db)):
-    """
-    Логин по JSON:
-    {
-      "username": "...",
-      "password": "..."
-    }
-
-    Возвращает JSON с ключом "token".
-    """
-    user = db_queries.get_user(db, username=request.username)
-    # Проверяем, что пользователь существует и пароль совпадает
-    if not user or not HashPassword.verify(user.password, request.password):
+@router.post("/token")
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+    user = db_queries.get_user(db, username=form_data.username)
+    if not user or not HashPassword.verify(user.password, form_data.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password"
         )
-
     access_token = create_access_token(data={"username": user.username})
-    return {"token": access_token}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
 
 @router.post("/logout")
 def logout(db: Session = Depends(get_db), token: str = Depends(oauth2_schema)):
