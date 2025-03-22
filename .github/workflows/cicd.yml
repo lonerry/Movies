@@ -6,7 +6,7 @@ on:
       - main  # или другая ветка для деплоя
 
 env:
-  IMAGE_NAME: yourdockerhubusername/movies-app
+  IMAGE_NAME: lonerry/movies-app
 
 jobs:
   build-and-deploy:
