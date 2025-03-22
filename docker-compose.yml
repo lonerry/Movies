@@ -19,7 +19,6 @@ services:
       start_period: 30s
 
   app:
-    build: .
     container_name: movies_app
     ports:
       - "8000:8000"
