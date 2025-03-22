@@ -12,6 +12,7 @@ from src.movies.apps.auth.db_queries import add_revoked_token, is_token_revoked
 
 oauth2_schema = OAuth2PasswordBearer(tokenUrl='/auth/token')
 
+
 SECRET_KEY = '52367badbf4e42f3a94d9ce456e1f01cbfee36a604da5c9589fa84f0bb9e661b'
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 1000
