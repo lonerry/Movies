@@ -46,6 +46,8 @@ services:
     networks:
       - movies_net
 
+
 networks:
   movies_net:
     driver: bridge
+
