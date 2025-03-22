@@ -3,7 +3,7 @@ name: CI/CD for FastAPI
 on:
   push:
     branches:
-      - main  # или другая ветка для деплоя
+      - main
 
 env:
   IMAGE_NAME: lonerry/movies-app
@@ -41,8 +41,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/MoviesGH
-
-            docker-compose pull
+            git pull origin main 
             docker-compose down
-            docker-compose up -d
-
+            docker-compose up -d --build
