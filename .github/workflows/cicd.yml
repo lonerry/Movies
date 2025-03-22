@@ -41,6 +41,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/MoviesGH
-            git pull origin main 
             docker-compose down
             docker-compose up -d --build
