@@ -11,7 +11,7 @@ WORKDIR /src
 COPY ./pyproject.toml ./poetry.lock /src/
 RUN poetry install --no-root
 
-COPY . /src
+COPY ./src /src
 COPY wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
 
