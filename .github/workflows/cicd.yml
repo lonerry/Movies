@@ -40,8 +40,8 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            docker pull lonerry/movies-app:latest
             cd ~/MoviesGH
             docker-compose down
-            docker pull ${{ env.IMAGE_NAME }}:latest  # <-- добавить эту строку
             docker-compose up -d
       
