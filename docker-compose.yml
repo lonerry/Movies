@@ -19,9 +19,6 @@ services:
       start_period: 30s
 
   app:
-    build:
-      context: .         # Текущая папка, где Dockerfile и main.py
-      dockerfile: Dockerfile
     image: lonerry/movies-app:latest
     container_name: movies_app
     ports:
