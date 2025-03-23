@@ -6,15 +6,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN pip install --upgrade pip && pip install poetry
 
-WORKDIR /src
+WORKDIR /app
 
-COPY ./pyproject.toml ./poetry.lock /src/
+COPY ./pyproject.toml ./poetry.lock /app/
 RUN poetry install --no-root
 
-COPY ./src /src
+COPY . /app
 COPY wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
 
+ENV PYTHONPATH=/app
+
 EXPOSE 8000
 
-CMD ["sh", "-c", "/wait-for-it.sh db:3306 -- poetry run uvicorn main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "/wait-for-it.sh db:3306 -- poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --app-dir /app"]

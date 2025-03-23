@@ -19,6 +19,9 @@ services:
       start_period: 30s
 
   app:
+    build:
+      context: .         # Текущая папка, где Dockerfile и main.py
+      dockerfile: Dockerfile
     image: lonerry/movies-app:latest
     container_name: movies_app
     ports:
@@ -26,11 +29,12 @@ services:
     environment:
       DATABASE_URL: "mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@db:3306/my_database"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - movies_net
     command: >
-      sh -c "/wait-for-it.sh db:3306 -t 60 -- poetry run uvicorn main:app --host 0.0.0.0 --port 8000"
+      sh -c "/wait-for-it.sh db:3306 -t 60 -- poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --app-dir /app"
 
 networks:
   movies_net:
