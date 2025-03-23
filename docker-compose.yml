@@ -31,5 +31,7 @@ services:
       - movies_net
     command: >
       sh -c "/wait-for-it.sh db:3306 -t 60 -- poetry run uvicorn main:app --host 0.0.0.0 --port 8000"
-  
-  
+
+networks:
+  movies_net:
+    driver: bridge
