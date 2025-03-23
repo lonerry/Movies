@@ -1,12 +1,13 @@
 from pydantic import BaseModel, Field, validator
 from typing import Optional
 
-class RatedFilmCreate(BaseModel):
+class RatedFilmUpdate(BaseModel):
     list_id: int
     movie_id: int
     rating_type: Optional[str] = Field(None, description="stars или poors")
     rating_value: Optional[int] = Field(None, description="1..3")
-    watched: bool = False
+    watched: Optional[bool] = None
+
 
     @validator("rating_value")
     def check_rating_value(cls, v):
@@ -14,10 +15,6 @@ class RatedFilmCreate(BaseModel):
             raise ValueError("rating_value must be between 1 and 3")
         return v
 
-class RatedFilmUpdate(BaseModel):
-    rating_type: Optional[str] = Field(None, description="stars или poors")
-    rating_value: Optional[int] = Field(None, description="1..3")
-    watched: Optional[bool] = None
 
 class RatedFilmOut(BaseModel):
     id: int
@@ -30,3 +27,8 @@ class RatedFilmOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+class RatedFilmDelete(BaseModel):
+    list_id: int
+    movie_id: int
+

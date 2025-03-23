@@ -78,14 +78,19 @@ def create_or_update_rating(
 def update_rating(
     db: Session,
     user_id: int,
-    rated_id: int,
     data: schemas.RatedFilmUpdate
 ):
+
     """
     Частично обновляет запись RatedFilm (rating_type, rating_value, watched).
     Проверяем права через movie_list_id.
     """
-    rated = db.query(RatedFilm).filter(RatedFilm.id == rated_id).first()
+    rated = db.query(RatedFilm).filter_by(
+        user_id=user_id,
+        movie_list_id=data.list_id,
+        movie_id=data.movie_id
+    ).first()
+
     if not rated:
         raise HTTPException(status_code=404, detail="RatedFilm not found")
 
@@ -123,29 +128,26 @@ def update_rating(
 def delete_rating(
     db: Session,
     user_id: int,
-    rated_id: int
+    data: schemas.RatedFilmDelete
 ):
-    """
-    Удаляет запись RatedFilm.
-    """
-    rated = db.query(RatedFilm).filter(RatedFilm.id == rated_id).first()
+    rated = db.query(RatedFilm).filter_by(
+        user_id=user_id,
+        movie_list_id=data.list_id,
+        movie_id=data.movie_id
+    ).first()
     if not rated:
         raise HTTPException(status_code=404, detail="RatedFilm not found")
 
-    # Проверяем список
-    movie_list = db.query(MovieList).filter(MovieList.id == rated.movie_list_id).first()
+    movie_list = db.query(MovieList).filter(MovieList.id == data.list_id).first()
     if not movie_list:
         raise HTTPException(status_code=404, detail="MovieList not found")
 
-    # Проверяем права
     is_owner = (movie_list.user_id == user_id)
     share_record = db.query(MovieListShare).filter_by(
-        movie_list_id=movie_list.id,
+        movie_list_id=data.list_id,
         friend_id=user_id
     ).first()
-    can_edit = False
-    if share_record and share_record.can_edit:
-        can_edit = True
+    can_edit = share_record and share_record.can_edit
 
     if not (is_owner or can_edit):
         raise HTTPException(status_code=403, detail="No permission to delete this rating")

@@ -7,7 +7,6 @@ from src.movies.apps.user.schemas import UserCreate
 from src.movies.apps.user import schemas, db_queries
 from .hash_password import HashPassword
 from fastapi import status
-from .schemas import LoginSchema
 router = APIRouter(
     prefix="/auth",
     tags=["authentication"],
@@ -17,7 +16,7 @@ router = APIRouter(
 async def register_user(request: UserCreate, db: Session = Depends(get_db)):
     """
     Зарегистрировать нового пользователя.
-    Ничего не возвращает (при успехе 201 Created).
+    Возвращает "Successfully registered!" при успешной регистрации
     """
     existing_user = db_queries.get_user(db, email=request.email)
     if existing_user:
@@ -25,10 +24,8 @@ async def register_user(request: UserCreate, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User already exists"
         )
-    # Создаём нового пользователя
     db_queries.create_user(db, request)
-    # Просто завершаем без возвращаемых данных
-    return
+    return "Successfully registered!"
 
 @router.post("/token")
 def login(

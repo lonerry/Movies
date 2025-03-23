@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import List, Optional
-
+from fastapi import Body
 from db import get_db
 from src.movies.apps.auth.oauth2 import get_current_user
 from src.movies.apps.rated_films import schemas
@@ -29,29 +29,24 @@ def create_or_update_rating(
     return db_queries.create_or_update_rating(db, current_user.id, data)
 
 
-@router.patch("/{rated_id}", response_model=schemas.RatedFilmOut)
+@router.patch("/", response_model=schemas.RatedFilmOut)
 def update_rating(
-    rated_id: int,
     data: schemas.RatedFilmUpdate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    """
-    Частично обновляет запись RatedFilm (rating_type, rating_value, watched).
-    """
-    return db_queries.update_rating(db, current_user.id, rated_id, data)
+    return db_queries.update_rating(db, current_user.id, data)
 
 
-@router.delete("/{rated_id}", response_model=schemas.RatedFilmOut)
+
+@router.delete("/", response_model=schemas.RatedFilmOut)
 def delete_rating(
-    rated_id: int,
+    data: schemas.RatedFilmDelete = Body(...),
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    """
-    Удаляет запись RatedFilm (сбрасывает оценку и статус просмотра).
-    """
-    return db_queries.delete_rating(db, current_user.id, rated_id)
+    return db_queries.delete_rating(db, current_user.id, data)
+
 
 
 @router.get("/", response_model=List[schemas.RatedFilmOut])
