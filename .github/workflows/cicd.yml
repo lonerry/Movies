@@ -42,4 +42,6 @@ jobs:
           script: |
             cd ~/MoviesGH
             docker-compose down
-            docker-compose up -d --build
+            docker pull ${{ env.IMAGE_NAME }}:latest  # <-- добавить эту строку
+            docker-compose up -d
+      
