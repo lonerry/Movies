@@ -19,7 +19,7 @@ services:
       start_period: 30s
 
   app:
-    build: .
+    image: lonerry/movies-app:latest
     container_name: movies_app
     ports:
       - "8000:8000"
@@ -31,9 +31,5 @@ services:
       - movies_net
     command: >
       sh -c "/wait-for-it.sh db:3306 -t 60 -- poetry run uvicorn main:app --host 0.0.0.0 --port 8000"
-networks:
-  movies_net:
-    driver: bridge
-
-
-
+  
+  
