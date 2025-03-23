@@ -11,7 +11,7 @@ from src.movies.apps.movies.models import Movie, MovieList, MovieListShare
 def create_or_update_rating(
     db: Session,
     user_id: int,
-    data: schemas.RatedFilmCreate
+    data: schemas.RatedFilmUpdate
 ):
     """
     Создаёт или обновляет оценку/статус для (user_id, list_id, movie_id).
