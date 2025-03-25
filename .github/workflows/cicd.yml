@@ -43,5 +43,6 @@ jobs:
             docker pull lonerry/movies-app:latest
             cd ~/MoviesGH
             docker-compose down
-            docker-compose up -d
+            docker-compose up -d --force-recreate --renew-anon-volumes
+
       

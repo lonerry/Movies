@@ -20,6 +20,7 @@ services:
 
   app:
     image: lonerry/movies-app:latest
+    pull_policy: always
     container_name: movies_app
     ports:
       - "8000:8000"
