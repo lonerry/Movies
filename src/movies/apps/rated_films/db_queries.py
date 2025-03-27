@@ -6,7 +6,7 @@ from src.movies.apps.rated_films.models import RatedFilm
 from src.movies.apps.rated_films import schemas
 from src.movies.apps.movies.models import Movie, MovieList, MovieListShare
 
-
+# Функция проверки прав доступа к списку фильмов
 def _check_list_permissions(db: Session, user_id: int, list_id: int, can_edit_required: bool = False):
     movie_list = db.query(MovieList).filter(MovieList.id == list_id).first()
     if not movie_list:
@@ -25,7 +25,7 @@ def _check_list_permissions(db: Session, user_id: int, list_id: int, can_edit_re
 
     return movie_list
 
-
+# Функция создания или обновления оценки фильма
 def create_or_update_rating(db: Session, user_id: int, data: schemas.RatedFilmUpdate):
     _check_list_permissions(db, user_id, data.list_id, can_edit_required=True)
 
@@ -63,7 +63,7 @@ def create_or_update_rating(db: Session, user_id: int, data: schemas.RatedFilmUp
     db.refresh(rated)
     return rated
 
-
+# Функция обновления существующей оценки
 def update_rating(db: Session, user_id: int, data: schemas.RatedFilmUpdate):
     rated = db.query(RatedFilm).filter_by(
         user_id=user_id,
@@ -86,7 +86,7 @@ def update_rating(db: Session, user_id: int, data: schemas.RatedFilmUpdate):
     db.refresh(rated)
     return rated
 
-
+# Функция удаления оценки
 def delete_rating(db: Session, user_id: int, data: schemas.RatedFilmDelete):
     rated = db.query(RatedFilm).filter_by(
         user_id=user_id,
@@ -102,7 +102,7 @@ def delete_rating(db: Session, user_id: int, data: schemas.RatedFilmDelete):
     db.commit()
     return rated
 
-
+# Функция получения всех оценок пользователя, с возможной фильтрацией по статусу "watched"
 def get_user_ratings(db: Session, user_id: int, watched: Optional[bool] = None):
     query = db.query(RatedFilm).filter(RatedFilm.user_id == user_id)
     if watched is not None:

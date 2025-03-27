@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, validator
 from typing import List, Optional
 
+# Схема для создания нового пользователя (регистрация)
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
@@ -31,6 +32,7 @@ class UserDetails(BaseModel):
     class Config:
         from_attributes = True
 
+# Схема для вывода списка пользователей
 class UserListResponse(BaseModel):
     count: int
     results: List[UserDetails]
@@ -38,7 +40,7 @@ class UserListResponse(BaseModel):
     class Config:
         from_attributes = True
 
-
+# Схема для обновления данных пользователя (поля опциональны)
 class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None

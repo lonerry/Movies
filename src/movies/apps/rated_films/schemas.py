@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, validator
 from typing import Optional
 
+# Схема для создания или обновления оценки фильма
 class RatedFilmUpdate(BaseModel):
     list_id: int
     movie_id: int
@@ -15,6 +16,7 @@ class RatedFilmUpdate(BaseModel):
             raise ValueError("rating_value must be between 1 and 3")
         return v
 
+# Схема для создания оценки
 class RatedFilmCreate(BaseModel):
     list_id: int
     movie_id: int
@@ -28,6 +30,7 @@ class RatedFilmCreate(BaseModel):
             raise ValueError("rating_value must be between 1 and 3")
         return v
 
+# Схема для создания оценки
 class RatedFilmOut(BaseModel):
     id: int
     user_id: int

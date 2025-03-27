@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from db import Base
 
+# Модель, представляющая таблицу для оценки фильма
 class RatedFilm(Base):
     __tablename__ = "rated_film"
     id = Column(Integer, primary_key=True, index=True)

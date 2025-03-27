@@ -14,6 +14,15 @@ def create_or_update_rating(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
+    """
+        Создает или обновляет оценку для фильма.
+
+        Принимает:
+          - data (RatedFilmUpdate): данные, содержащие идентификатор списка, фильма, тип и значение оценки, а также флаг просмотра.
+
+        Возвращает:
+          - RatedFilmOut: объект оценки фильма, содержащий обновленные данные.
+        """
     return db_queries.create_or_update_rating(db, current_user.id, data)
 
 @router.delete("/delete", response_model=schemas.RatedFilmOut)
@@ -22,6 +31,15 @@ def delete_rating(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
+    """
+       Удаляет оценку для фильма.
+
+       Принимает:
+         - data (RatedFilmDelete): данные, содержащие идентификаторы списка и фильма.
+
+       Возвращает:
+         - RatedFilmOut: объект удаленной оценки фильма.
+       """
     return db_queries.delete_rating(db, current_user.id, data)
 
 

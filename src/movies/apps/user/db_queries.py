@@ -4,11 +4,11 @@ from sqlalchemy.orm import Session
 from . import schemas, models
 from src.movies.apps.auth.hash_password import hash_password
 
-
+# Получение всех пользователей из бд
 def get_all_users(db: Session):
     return db.query(models.User).all()
 
-
+# Получение пользователя по id, email или username; требуется указать ровно один параметр
 def get_user(db: Session, *, id=None, email=None, username=None):
     if sum(p is not None for p in (id, email, username)) != 1:
         raise ValueError("Provide exactly one of id, email, or username")
@@ -20,7 +20,7 @@ def get_user(db: Session, *, id=None, email=None, username=None):
     if username:
         return db.query(models.User).filter_by(username=username).first()
 
-
+# Создание нового пользователя с хешированием пароля
 def create_user(db: Session, request: schemas.UserCreate):
     if get_user(db, username=request.username):
         raise HTTPException(status_code=400, detail="Username is already taken")
@@ -30,14 +30,14 @@ def create_user(db: Session, request: schemas.UserCreate):
     new_user = models.User(
         username=request.username,
         email=request.email,
-        password=hash_password(request.password),  # ✅ исправлено здесь
+        password=hash_password(request.password),
     )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     return new_user
 
-
+# Обновление данных пользователя, включая хеширование нового пароля
 def update_user(db: Session, user: schemas.UserCreate, user_id: int):
     db_user = get_user(db, id=user_id)
     if not db_user:
@@ -45,13 +45,13 @@ def update_user(db: Session, user: schemas.UserCreate, user_id: int):
 
     db_user.username = user.username
     db_user.email = user.email
-    db_user.password = hash_password(user.password)  # ✅ исправлено здесь
+    db_user.password = hash_password(user.password)
 
     db.commit()
     db.refresh(db_user)
     return db_user
 
-
+# Удаление пользователя из бд
 def delete_user(db: Session, id: int):
     db_user = get_user(db, id=id)
     if not db_user:

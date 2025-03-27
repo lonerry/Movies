@@ -5,17 +5,19 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, bind=engine)
+
+engine = create_engine(DATABASE_URL)#движок SQLAlchemy для подключения к бд
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)#Фабрика сессий
 
 Base = declarative_base()
 
+# Функция-генератор для получения сессии
 def get_db():
-    db = SessionLocal()
+    db = SessionLocal()  # Создаем новую сессию
     try:
-        yield db
+        yield db       # Передаем сессию в эндпоинт
     finally:
-        db.close()
+        db.close()     # Гарантируем закрытие сессии после завершения запроса
