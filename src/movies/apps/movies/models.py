@@ -2,8 +2,6 @@ from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from db import Base
 
-# Импортируем User из папки user
-
 class MovieList(Base):
     __tablename__ = "movie_list"
 
@@ -22,10 +20,9 @@ class MovieListShare(Base):
     id = Column(Integer, primary_key=True, index=True)
     movie_list_id = Column(Integer, ForeignKey("movie_list.id"))
     friend_id = Column(Integer, ForeignKey("user.id"))
-    can_edit = Column(Boolean, default=False)  # True => гость может редактировать
+    can_edit = Column(Boolean, default=False)
 
     movie_list = relationship("MovieList", back_populates="shares")
-    # friend = relationship("User")  # если нужно
 
 class Movie(Base):
     __tablename__ = "movie"

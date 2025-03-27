@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 class RegisterResponse(BaseModel):
     access_token: str
@@ -11,3 +11,8 @@ class RegisterResponse(BaseModel):
 class LoginSchema(BaseModel):
     username: str
     password: str
+
+class UserUpdate(BaseModel):
+    username: Optional[str]
+    email: Optional[EmailStr]
+    password: Optional[str]

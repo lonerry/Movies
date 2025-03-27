@@ -1,10 +1,9 @@
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import Optional
-
 from src.movies.apps.movies.models import MovieList, Movie, MovieListShare
 from src.movies.apps.movies import schemas
-from src.movies.apps.rated_films.models import RatedFilm  # <-- Импортируем RatedFilm
+from src.movies.apps.rated_films.models import RatedFilm
 
 def fill_movies_with_rating(
     db: Session,
@@ -12,16 +11,9 @@ def fill_movies_with_rating(
     movie_list,
     filter_watched: Optional[bool] = None
 ):
-    """
-    Превращает movie_list.movies -> список MovieWithRating,
-    подставляя rating_type, rating_value, watched из rated_film (если есть).
-    Если filter_watched=True, возвращаем только просмотренные.
-    Если filter_watched=False, только непросмотренные.
-    Если None, возвращаем все.
-    """
+
     result = []
     for m in movie_list.movies:
-        # Ищем запись в rated_film (RatedFilm) для текущего user_id
         rated = db.query(RatedFilm).filter_by(
             user_id=user_id,
             movie_list_id=movie_list.id,
@@ -37,7 +29,6 @@ def fill_movies_with_rating(
             rating_value = None
             watched_flag = False
 
-        # Если фильтр по watched задан, пропускаем те, что не совпадают
         if filter_watched is not None and watched_flag != filter_watched:
             continue
 
@@ -67,7 +58,6 @@ def add_movie_to_list(db: Session, user_id: int, list_id: int, data: schemas.Mov
     if not movie_list:
         raise HTTPException(status_code=404, detail="List not found")
 
-    # Проверяем права
     share_record = db.query(MovieListShare).filter_by(movie_list_id=list_id, friend_id=user_id, can_edit=True).first()
     is_owner = (movie_list.user_id == user_id)
     if not (is_owner or share_record):
@@ -108,9 +98,6 @@ def share_movie_list(db: Session, user_id: int, list_id: int, data: schemas.Movi
 
 
 def get_movie_list(db: Session, user_id: int, list_id: int):
-    """
-    Возвращаем список, если user_id владелец или guest
-    """
     from sqlalchemy import or_, and_
     q = db.query(MovieList).outerjoin(
         MovieListShare,
@@ -148,16 +135,10 @@ def update_movie_info(
     movie_id: int,
     data: schemas.MovieInfoUpdate
 ):
-    """
-    Обновляет название и/или описание фильма в указанном списке.
-    Проверяем, что user_id владелец или share.can_edit=True.
-    """
-    # 1) Проверяем, что список существует
     movie_list = db.query(MovieList).filter(MovieList.id == list_id).first()
     if not movie_list:
         raise HTTPException(status_code=404, detail="List not found")
 
-    # 2) Проверяем права
     is_owner = (movie_list.user_id == user_id)
     share_record = db.query(MovieListShare).filter_by(
         movie_list_id=list_id,
@@ -168,7 +149,6 @@ def update_movie_info(
     if not (is_owner or share_record):
         raise HTTPException(status_code=403, detail="No permission to edit this list")
 
-    # 3) Ищем фильм в этом списке
     movie = db.query(Movie).filter(
         Movie.id == movie_id,
         Movie.movie_list_id == list_id
@@ -176,7 +156,6 @@ def update_movie_info(
     if not movie:
         raise HTTPException(status_code=404, detail="Movie not found in this list")
 
-    # 4) Обновляем поля
     if data.new_title is not None:
         movie.title = data.new_title
     if data.new_description is not None:

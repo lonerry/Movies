@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, validator
-from typing import List
+from typing import List, Optional
 
 class UserCreate(BaseModel):
     username: str
@@ -8,13 +8,10 @@ class UserCreate(BaseModel):
 
     @validator("password")
     def validate_password(cls, value):
-        # 1) Длина >= 8
         if len(value) < 8:
             raise ValueError("Password must be at least 8 characters long")
-        # 2) Хотя бы одна заглавная буква
         if not any(ch.isupper() for ch in value):
             raise ValueError("Password must contain at least one uppercase letter")
-        # 3) Хотя бы один специальный символ
         special_chars = "!@#$%^&*()_+=-{}[]|:;'\"<>,.?/~`"
         if not any(ch in special_chars for ch in value):
             raise ValueError("Password must contain at least one special character")
@@ -40,3 +37,9 @@ class UserListResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
