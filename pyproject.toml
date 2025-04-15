@@ -40,6 +40,9 @@ dependencies = [
 [tool.poetry]
 packages = [{include = "movies"}]
 
+[tool.uv.workspace]
+members = ["numbers"]
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
